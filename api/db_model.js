@@ -1,8 +1,8 @@
-const nanoid = require('nanoid');
+const shortid = require('shortid');
 
 let users = [
     {
-        id: "a_unique_id",
+        id: shortid.generate(),
         name: "Jane Doe", 
         bio: "Not Tarzan's Wife, another Jane",
       }
@@ -17,7 +17,7 @@ module.exports = {
         return Promise.resolve(user);
     }, 
     create({name, bio}) {
-        const newUser = { id: nanoid.generate(), name, bio }
+        const newUser = { id: shortid.generate(), name, bio }
         users.push(newUser)
         return Promise.resolve(newUser)
     }, 
