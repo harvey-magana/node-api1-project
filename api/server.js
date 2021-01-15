@@ -17,15 +17,16 @@ server.post('/api/users', async(req, res) => {
         res.status(400).json({
             errorMessage: "Please provide name and bio for the user."
         })
-    }
-
-    try{
-        const newlyCreatedUser = await User.create(user);
-        res.status(200).json(newlyCreatedUser);
-    } catch(err) {
-        res.status(500).json({
-            error: err.message
-        })
+    } else {
+        
+        try{
+            const newlyCreatedUser = await User.create(user);
+            res.status(200).json(newlyCreatedUser);
+        } catch(err) {
+            res.status(500).json({
+                error: err.message
+            })
+        }
     }
 })
 
@@ -57,6 +58,29 @@ server.delete('/api/users/:id', async(req, res) => {
         res.status(500).json({
             errorMessage: "The user information could not be retrieved."
         })
+    }
+})
+
+server.put('/api/users/:id', async(req, res) => {
+    const {id} = res.params;
+    const changes = req.body;
+
+    if(!name || !bio) {
+        res.status(400).json({
+            errorMessage: "Please provide name and bio for the user."
+        })
+    } else {
+        
+        try{
+            const updatedUser = await User.update(id, changes);
+            if(updatedUser) {
+                res.status(200).json(updatedUser);
+            } else {
+                res.status(404).json({ message: "Unknown id"})
+            }
+        } catch(err) {
+            res.status(500).json({ error: err.message })
+        }
     }
 })
 
