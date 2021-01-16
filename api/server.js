@@ -13,7 +13,7 @@ server.get('/', (req, res) => {
 server.post('/api/users', async(req, res) => {
     const user = req.body;
 
-    if(!name || !bio) {
+    if(!user.name || !user.bio) {
         res.status(400).json({
             errorMessage: "Please provide name and bio for the user."
         })
@@ -41,6 +41,21 @@ server.get('/api/users', async (req, res) => {
     }
 })
 
+server.get('/api/users/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try{
+        const user = await User.findById(id)
+        if(user) {
+            res.status(200).json(user)
+        } else{
+            res.status(404).json({ message: "The user with the specified ID does not exist."})
+        }
+    } catch(err) {
+        res.status(500).json({ errorMessage: "The user information could not be retrieved."})
+    }
+})
+
 server.delete('/api/users/:id', async(req, res) => {
     const {id} = req.params;
 
@@ -62,26 +77,33 @@ server.delete('/api/users/:id', async(req, res) => {
 })
 
 server.put('/api/users/:id', async(req, res) => {
-    const {id} = res.params;
+    const {id} = req.params;
     const changes = req.body;
 
-    if(!name || !bio) {
-        res.status(400).json({
-            errorMessage: "Please provide name and bio for the user."
-        })
-    } else {
-        
-        try{
-            const updatedUser = await User.update(id, changes);
-            if(updatedUser) {
-                res.status(200).json(updatedUser);
-            } else {
-                res.status(404).json({ message: "Unknown id"})
-            }
-        } catch(err) {
-            res.status(500).json({ error: err.message })
-        }
-    }
+    if (!changes.name || !changes.bio) {
+        return res
+          .status(400)
+          .json({ errorMessage: 'Please provide name and bio for the user' });
+      }
+    
+      const user = await User.findById(id);
+    
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: 'The user with the specified ID does not exist.' });
+      }
+    
+      const updated = await User.update(id, changes);
+    
+      if (!updated) {
+        return res
+          .status(500)
+          .json({ error: 'The user information could not be modified' });
+      }
+    
+      const updatedUser = await User.findById(id);
+      return res.status(200).json(updatedUser);
 })
 
 module.exports = server;
